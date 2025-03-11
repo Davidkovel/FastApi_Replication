@@ -1,0 +1,1 @@
+from .posts.views import posts_router
