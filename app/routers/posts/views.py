@@ -1,11 +1,21 @@
-from fastapi import APIRouter
+from typing import Iterable, List
+
+from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
+
+from app.routers.posts.schemas import Post
+from app.data.queries.functions import get_posts_operation
 
 posts_router = APIRouter(prefix="/api/posts")
 
 
-@posts_router.get("/get_posts")
-async def get_posts():
-    return [{"title": "Post 1"}, {"title": "Post 2"}]
+@posts_router.get("/get_posts", response_model=List[Post])
+async def get_posts(request: Request):
+    db_session = request.state.db_session
+
+    posts = await get_posts_operation(db_session)
+
+    return JSONResponse(status_code=200, content=posts)
 
 
 @posts_router.post("/create_post")
