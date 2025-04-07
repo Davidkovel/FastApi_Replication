@@ -3,13 +3,27 @@ from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel
 
+
 class PostBase(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
     tags: Optional[List[str]] = None
 
+
 class PostCreate(PostBase):
     pass
+
+
+class PostUpdate(PostBase):
+    id: int
+    title: Optional[str] = None
+    content: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class PostDelete(BaseModel):
+    id: int
+
 
 class Post(PostBase):
     id: int
