@@ -3,8 +3,9 @@ import os
 from fastapi import APIRouter, Request, HTTPException
 from starlette.responses import JSONResponse
 
-from app.data.queries.functions import get_user_by, add_new_user
-from app.routers.auth.schemas import UserProfileResponseModel, UserModel, UserResponseModel
+from app.data.queries.functions import get_user_by, add_new_user, get_user_by_login, authenticate_user
+from app.routers.auth.schemas import UserProfileResponseModel, UserModel, UserResponseModel, Token, OAuthForm
+from app.routers.auth.security import create_access_token
 
 SECRET_KEY = os.getenv("S")
 ALGORITHM = "HS256"
@@ -14,7 +15,7 @@ auth_router = APIRouter(prefix="/api/auth")
 
 
 @auth_router.post("/register", response_model=UserProfileResponseModel)
-async def register(request: Request, user_data: UserModel):
+async def register_new_user(request: Request, user_data: UserModel):
     db_session = request.state.db_session
 
     check_user = await get_user_by(db_session, user_data)
@@ -33,11 +34,19 @@ async def register(request: Request, user_data: UserModel):
     )).dict())
 
 
-@auth_router.get("/login")
-async def login():
-    return {"message": "Login endpoint"}
+@auth_router.post("/sign-in", response_model=Token)
+async def send_access_token(request: Request, form_data: OAuthForm):
+    db_session = request.state.db_session
+
+    user = await authenticate_user(form_data=form_data, db_session=db_session)
+    if not user:
+        raise HTTPException(status_code=401, detail="Пользователь с указанным логином и паролем не найден")
+
+    access_token_expire = None
+    access_token = create_access_token(data={"sub": form_data.login}, expire_delta=access_token_expire)
+
+    response = JSONResponse(status_code=200, content=Token(token=access_token).dict())
+
+    return response
 
 
-@auth_router.get("/logout")
-async def logout():
-    return {"message": "Logout endpoint"}

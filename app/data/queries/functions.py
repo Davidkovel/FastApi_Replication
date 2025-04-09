@@ -1,10 +1,11 @@
 from collections.abc import Iterable
+from typing import Union
 
 from sqlalchemy import select, update, delete, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.routers.auth.model import User
-from app.routers.auth.schemas import UserModel
+from app.routers.auth.schemas import UserModel, OAuthForm, userLogin
 from app.routers.posts.models import Post
 from app.utils.scripts import Hasher
 
@@ -57,6 +58,17 @@ async def get_user_by(db_session: AsyncSession, user_data: UserModel):
     return user
 
 
+async def get_user_by_login(login: userLogin, db_session: AsyncSession) -> Union[User, bool]:
+    if not login:
+        return None
+
+    query = select(User).where(User.id == login)
+    result = await db_session.execute(query)
+    user = result.scalars().one_or_none()
+
+    return user
+
+
 async def add_new_user(db_session: AsyncSession, user_data: UserModel):
     user_data.password = Hasher.get_password_hash(password=user_data.password)
 
@@ -73,3 +85,14 @@ async def add_new_user(db_session: AsyncSession, user_data: UserModel):
     await db_session.commit()
 
     return new_user
+
+
+async def authenticate_user(db_session: AsyncSession, form_data: OAuthForm) -> Union[User, bool]:
+    user = await get_user_by_login(login=form_data.login, db_session=db_session)
+
+    if not user:
+        return False
+    if not Hasher.verify_password(plain_password=form_data.password, hashed_password=user.password):
+        return False
+
+    return user

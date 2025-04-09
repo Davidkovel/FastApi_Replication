@@ -185,3 +185,15 @@ class UserProfileResponseModel(BaseModel):
     """
 
     profile: UserResponseModel
+
+
+class OAuthForm(BaseModel):
+    login: userLogin
+    password: userPassword
+
+
+class Token(BaseModel):
+    token: str = Field(
+        title="Access Token",
+        default="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+    )
