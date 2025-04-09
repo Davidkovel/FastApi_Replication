@@ -16,8 +16,8 @@ def create_access_token(data: dict, expire_delta: Optional[timedelta] = None) ->
         expire = datetime.utcnow() + expire_delta
     else:
         expire = datetime.utcnow() + timedelta(
-            days=Config.ACCESS_TOKEN_EXPIRE_DAYS,
-            hours=Config.ACCESS_TOKEN_EXPIRE_HOURS,
+            days=Config.ACCESS_TOKEN_EXPIRES_DAYS,
+            hours=Config.ACCESS_TOKEN_EXPIRES_HOURS,
             minutes=Config.ACCESS_TOKEN_EXPIRES_MINUTES,
         )
 

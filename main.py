@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, Asyn
 from starlette.middleware.base import RequestResponseEndpoint
 
 from app.db.base_class import Base
-from app.routers import posts_router
+from app.routers import posts_router, auth_router
 from app.config.config import Config
 
 
@@ -20,7 +20,7 @@ app = FastAPI(lifespan=lifespan)
 # print(os.environ)
 
 url = f"postgresql+asyncpg://{Config.POSTGRES_USER}:{Config.POSTGRES_PASSWORD}@{Config.POSTGRES_HOST}:{Config.POSTGRES_PORT}/{Config.POSTGRES_DATABASE}"
-
+print(f"[Info] Database URL: {url}")
 engine = create_async_engine(url=url, echo=False, future=True)
 db_pool = async_sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSession)
 
@@ -49,7 +49,8 @@ async def db_session_middleware(request: Request, call_next: RequestResponseEndp
 
 
 def main():
-    app.include_router(router=posts_router)
+    app.include_router(router=auth_router, prefix="/api/auth")
+    app.include_router(router=posts_router, prefix="/api/posts")
 
     import uvicorn
     uvicorn.run(app, port=8001)

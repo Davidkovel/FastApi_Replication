@@ -53,7 +53,7 @@ async def get_user_by(db_session: AsyncSession, user_data: UserModel):
     )
 
     result = await db_session.execute(query)
-    user = result.scallars().all()
+    user = result.scalars().all()
 
     return user
 
@@ -62,7 +62,7 @@ async def get_user_by_login(login: userLogin, db_session: AsyncSession) -> Union
     if not login:
         return None
 
-    query = select(User).where(User.id == login)
+    query = select(User).where(User.login == login)
     result = await db_session.execute(query)
     user = result.scalars().one_or_none()
 

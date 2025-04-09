@@ -9,11 +9,11 @@ class Settings(BaseSettings):
     SERVER_HOST: str = os.environ.get('SERVER_HOST', '0.0.0.0')
     SERVER_PORT: int = os.environ.get('SERVER_PORT', 8080)
 
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_HOST: str
-    POSTGRES_PORT: int
-    POSTGRES_DATABASE: str
+    POSTGRES_USER: str = os.environ.get('POSTGRES_USER', '')
+    POSTGRES_PASSWORD: str = os.environ.get('POSTGRES_PASSWORD', '')
+    POSTGRES_HOST: str = os.environ.get('POSTGRES_HOST', 'localhost')
+    POSTGRES_PORT: int = os.environ.get('POSTGRES_PORT', 5432)
+    POSTGRES_DATABASE: str = os.environ.get('POSTGRES_DATABASE', 'postgres')
 
     RANDOM_SECRET: str = os.environ.get('RANDOM_SECRET', '')
     ALGORITHM: str = os.environ.get('ALGORITHM', '')
@@ -24,7 +24,9 @@ class Settings(BaseSettings):
 
     class Config:
         # f"{pathlib.Path(__file__).resolve().parent.parent.parent}/.env"
-        env_file = f"app/config/.env"
+        env_file = f"C:\\Users\\David\\PycharmProjects\\FastApi_Replication\\app\\.env"
 
 
 Config = Settings()
+
+# print(Config.__dict__)

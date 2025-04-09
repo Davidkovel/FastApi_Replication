@@ -8,7 +8,6 @@ userName = Annotated[constr(max_length=50), Field(
     title="User Name",
     description="Имя пользователя",
     max_length=50,
-    pattern=r'^[a-zA-Z0-9-]+$',
     examples=['Green Monkey']
 )]
 
@@ -81,7 +80,7 @@ class UserModel(BaseModel):
             raise HTTPException(status_code=400, detail="Имя слишком короткое.")
         elif len(name) > 50:
             raise HTTPException(status_code=400, detail="Имя слишком длинное.")
-        elif not re.search(pattern=r'^[a-zA-Z0-9-]+$', string=name):
+        elif not re.search(pattern=r'[a-zA-Z0-9_.±]+', string=name):
             raise HTTPException(status_code=400, detail="Имя не соответствует шаблону.")
 
         return name
@@ -94,8 +93,6 @@ class UserModel(BaseModel):
             raise HTTPException(status_code=400, detail="Длина логина слишком маленькая.")
         elif len(login) > 30:
             raise HTTPException(status_code=400, detail="Длина логина превышает допустимый лимит.")
-        elif not re.search(pattern=r'^[a-zA-Z0-9-]+$', string=login):
-            raise HTTPException(status_code=400, detail="Логин не соответствует шаблону.")
 
         return login
 
@@ -120,24 +117,6 @@ class UserModel(BaseModel):
             raise HTTPException(status_code=400, detail="Длина e-mail превышает допустимый лимит.")
 
         return email
-
-    @field_validator('countryCode', mode='before')
-    def validate_country_code(cls, countryCode):
-        if not countryCode:
-            raise HTTPException(status_code=400, detail="Поле countryCode не указано.")
-        elif not re.search(pattern=r'^[a-zA-Z]{2}$', string=countryCode):
-            raise HTTPException(status_code=400, detail="Код страны не соответствует шаблону.")
-
-        return countryCode
-
-    @field_validator('isPublic', mode='before')
-    def validate_is_public(cls, isPublic):
-        if isPublic is None:
-            raise HTTPException(status_code=400, detail="Поле isPublic не указано.")
-        elif not isinstance(isPublic, bool):
-            raise HTTPException(status_code=400, detail="В поле isPublic передан не boolean.")
-
-        return isPublic
 
     @field_validator('phone', mode='before')
     def validate_phone(cls, phone):

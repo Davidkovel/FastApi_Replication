@@ -1,1 +1,2 @@
-from .posts.views import posts_router, auth_router
+from .posts.views import posts_router
+from .auth.views import auth_router
