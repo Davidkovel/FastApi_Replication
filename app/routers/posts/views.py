@@ -1,11 +1,44 @@
-from typing import Iterable, List
+from http.client import HTTPException
+from typing import Iterable, List, Annotated
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordBearer
 
+from app.routers.auth.schemas import Token
 from app.routers.posts.schemas import Post, PostCreate, PostUpdate, PostDelete
 from app.data.queries.functions import get_posts_operation, create_post_operation, update_post_operation, \
-    delete_post_operation, get_post_by_id
+    delete_post_operation, get_post_by_id, get_user_by_login
+from app.utils.security import decode_access_token
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/sign-in")
+
+
+async def get_current_user_by_token(request: Request, token: Annotated[Token, Depends(oauth2_scheme)]):
+    db_session = request.state.db_session
+    print('HERE RROR')
+    UnauthorizedResponse = HTTPException(status_code=401, detail="Переданный токен не существует либо некорректен.")
+    print('HERE RROR')
+    try:
+        payload = decode_access_token(token=token)
+        print(payload)
+        if not payload:
+            print('HERE RROR')
+            return UnauthorizedResponse
+
+        user_login = payload.get("sub")
+        if not user_login:
+            return UnauthorizedResponse
+
+        user = await get_user_by_login(db_session=db_session, login=user_login)
+        if not user:
+            return UnauthorizedResponse
+
+        return user
+    except Exception as ex:
+        print(ex)
+        raise HTTPException(status_code=401, detail="Переданный токен не существует либо некорректен.")
+
 
 posts_router = APIRouter(prefix="/api/posts")
 
@@ -18,14 +51,17 @@ async def get_posts(request: Request):
 
 
 @posts_router.post("/create_post", response_model=Post)
-async def create_post(request: Request, post_data: PostCreate):
+async def create_post(request: Request, post_data: PostCreate,
+                      current_user: Annotated[Token, Depends(get_current_user_by_token)]):
     db_session = request.state.db_session
+    print('dsfsd')
     new_post = await create_post_operation(db_session, post_data.model_dump())
     return new_post
 
 
 @posts_router.put("/update_post")
-async def update_post(request: Request, post_data: PostUpdate):
+async def update_post(request: Request, post_data: PostUpdate,
+                      current_user: Annotated[Token, Depends(get_current_user_by_token)]):
     db_session = request.state.db_session
 
     post = await get_post_by_id(db_session, post_data.id)
@@ -37,7 +73,8 @@ async def update_post(request: Request, post_data: PostUpdate):
 
 
 @posts_router.delete("/delete_post")
-async def delete_post(request: Request, post_data: PostDelete):
+async def delete_post(request: Request, post_data: PostDelete,
+                      current_user: Annotated[Token, Depends(get_current_user_by_token)]):
     db_session = request.state.db_session
 
     post = await get_post_by_id(db_session, post_data.id)

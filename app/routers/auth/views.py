@@ -3,9 +3,9 @@ import os
 from fastapi import APIRouter, Request, HTTPException
 from starlette.responses import JSONResponse
 
-from app.data.queries.functions import get_user_by, add_new_user, get_user_by_login, authenticate_user
+from app.data.queries.functions import get_user_by, add_new_user, authenticate_user
 from app.routers.auth.schemas import UserProfileResponseModel, UserModel, UserResponseModel, Token, OAuthForm
-from app.routers.auth.security import create_access_token
+from app.utils.security import create_access_token
 
 SECRET_KEY = os.getenv("S")
 ALGORITHM = "HS256"
@@ -50,3 +50,12 @@ async def send_access_token(request: Request, form_data: OAuthForm):
     return response
 
 
+
+{
+  "name": "GreenMonkey2",
+  "login": "yellowMonkey2",
+  "email": "2@gmail.com",
+  "password": "$aba4821FWfew01#.fewA$2",
+  "phone": "+36849512399222",
+  "image": "https://http.cat/images/1002.jpg"
+}

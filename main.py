@@ -49,8 +49,8 @@ async def db_session_middleware(request: Request, call_next: RequestResponseEndp
 
 
 def main():
-    app.include_router(router=auth_router, prefix="/api/auth")
-    app.include_router(router=posts_router, prefix="/api/posts")
+    app.include_router(router=auth_router)
+    app.include_router(router=posts_router)
 
     import uvicorn
     uvicorn.run(app, port=8001)
